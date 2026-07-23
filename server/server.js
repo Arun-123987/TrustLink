@@ -5,8 +5,11 @@ const connectDB = require("./config/db");
 
 const PORT = process.env.PORT || 5000;
 
+const authRoutes = require("./routes/authRoutes");
+app.use("/api/auth", authRoutes);
+
 connectDB();
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
