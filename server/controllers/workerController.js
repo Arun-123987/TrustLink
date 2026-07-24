@@ -1,3 +1,4 @@
+console.log("✅ workerController loaded");
 const Worker = require("../models/Worker");
 
 /**

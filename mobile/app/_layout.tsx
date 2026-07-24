@@ -37,6 +37,10 @@ useEffect(() => {
   options={{ headerShown: false }}
 />
       <Stack.Screen
+  name="worker/register"
+  options={{ headerShown: false }}
+/>
+      <Stack.Screen
         name="modal"
         options={{
           presentation: "modal",

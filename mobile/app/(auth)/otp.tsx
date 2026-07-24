@@ -57,11 +57,28 @@ export default function OTPScreen() {
 
     console.log("8️⃣ Navigation decision:", data.isNewUser);
 
-    if (data.isNewUser) {
-      router.replace("/role-select");
-    } else {
-      router.replace("/(tabs)");
-    }
+    const role = data.user.role;
+
+switch (role) {
+  case "pending":
+    router.replace("/worker/register");
+    break;
+
+  case "worker":
+    router.replace("/(tabs)");
+    break;
+
+  case "customer":
+    router.replace("/(tabs)");
+    break;
+
+  case "admin":
+    router.replace("/(tabs)");
+    break;
+
+  default:
+    Alert.alert("Unknown user role");
+}
 
     console.log("9️⃣ Navigation complete");
   } catch (error) {
