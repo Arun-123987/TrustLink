@@ -61,7 +61,7 @@ export default function OTPScreen() {
 
 switch (role) {
   case "pending":
-    router.replace("/worker/register");
+    router.replace("/role-select");
     break;
 
   case "worker":
