@@ -1,3 +1,4 @@
+import { WorkerRegistrationProvider } from "@/src/context/WorkerRegistrationContext";
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -22,6 +23,7 @@ useEffect(() => {
 
   return (
     <AuthProvider>
+      <WorkerRegistrationProvider>
   <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
     <Stack>
       <Stack.Screen
@@ -50,6 +52,7 @@ useEffect(() => {
     </Stack>
     <StatusBar style="auto" />
   </ThemeProvider>
+  </WorkerRegistrationProvider>
 </AuthProvider>
   );
 }

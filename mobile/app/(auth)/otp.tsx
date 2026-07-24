@@ -25,79 +25,79 @@ export default function OTPScreen() {
   } = useAuth();
 
   const verifyOTP = async () => {
-  if (otp.length !== 6) {
-    Alert.alert("Invalid OTP");
-    return;
-  }
-
-  try {
-    console.log("1️⃣ Verifying OTP");
-    const credential = await confirmation.confirm(otp);
-
-    console.log("2️⃣ OTP verified");
-
-    const idToken = await credential.user.getIdToken(true);
-
-    console.log("3️⃣ Firebase ID token received");
-
-    const data = await backendLogin(idToken);
-
-    console.log("4️⃣ Backend response:");
-    console.log(JSON.stringify(data, null, 2));
-
-    console.log("5️⃣ Saving tokens...");
-    await saveTokens(data.accessToken, data.refreshToken);
-
-    console.log("6️⃣ Tokens saved");
-
-    console.log("7️⃣ Updating AuthContext");
-    setUser(data.user);
-    setAccessToken(data.accessToken);
-    setRefreshToken(data.refreshToken);
-
-    console.log("8️⃣ Navigation decision:", data.isNewUser);
-
-    const role = data.user.role;
-
-switch (role) {
-  case "pending":
-    router.replace("/role-select");
-    break;
-
-  case "worker":
-    router.replace("/(tabs)");
-    break;
-
-  case "customer":
-    router.replace("/(tabs)");
-    break;
-
-  case "admin":
-    router.replace("/(tabs)");
-    break;
-
-  default:
-    Alert.alert("Unknown user role");
-}
-
-    console.log("9️⃣ Navigation complete");
-  } catch (error) {
-    console.log("❌ VERIFY OTP ERROR");
-    console.log(error);
-
-    if (error.response) {
-      console.log("Response:", error.response.data);
+    if (otp.length !== 6) {
+      Alert.alert("Invalid OTP");
+      return;
     }
 
-    if (error.message) {
-      console.log("Message:", error.message);
+    try {
+      console.log("1️⃣ Verifying OTP");
+      const credential = await confirmation.confirm(otp);
+
+      console.log("2️⃣ OTP verified");
+
+      const idToken = await credential.user.getIdToken(true);
+
+      console.log("3️⃣ Firebase ID token received");
+
+      const data = await backendLogin(idToken);
+
+      console.log("4️⃣ Backend response:");
+      console.log(JSON.stringify(data, null, 2));
+
+      console.log("5️⃣ Saving tokens...");
+      await saveTokens(data.accessToken, data.refreshToken);
+
+      console.log("6️⃣ Tokens saved");
+
+      console.log("7️⃣ Updating AuthContext");
+      setUser(data.user);
+      setAccessToken(data.accessToken);
+      setRefreshToken(data.refreshToken);
+
+      console.log("8️⃣ Navigation decision:", data.isNewUser);
+
+      const role = data.user.role;
+
+      switch (role) {
+        case "pending":
+          router.replace("/role-select");
+          break;
+
+        case "worker":
+          router.replace("/(tabs)");
+          break;
+
+        case "customer":
+          router.replace("/(tabs)");
+          break;
+
+        case "admin":
+          router.replace("/(tabs)");
+          break;
+
+        default:
+          Alert.alert("Unknown user role");
+      }
+
+      console.log("9️⃣ Navigation complete");
+    } catch (error: any) {
+      console.log("❌ VERIFY OTP ERROR");
+      console.log(error);
+
+      if (error.response) {
+        console.log("Response:", error.response.data);
+      }
+
+      if (error.message) {
+        console.log("Message:", error.message);
+      }
+
+      console.log("Stack:", error.stack);
+
+      Alert.alert("OTP Verification Failed");
     }
-
-    console.log("Stack:", error.stack);
-
-    Alert.alert("OTP Verification Failed");
-  }
-};
+  };
 
   return (
     <View style={styles.container}>
@@ -125,39 +125,39 @@ switch (role) {
 }
 
 const styles = StyleSheet.create({
-  container:{
-    flex:1,
-    justifyContent:"center",
-    padding:24,
-    backgroundColor:"#fff"
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "#fff",
   },
 
-  title:{
-    fontSize:30,
-    fontWeight:"bold",
-    marginBottom:30,
-    textAlign:"center"
+  title: {
+    fontSize: 30,
+    fontWeight: "bold",
+    marginBottom: 30,
+    textAlign: "center",
   },
 
-  input:{
-    borderWidth:1,
-    borderColor:"#ccc",
-    borderRadius:10,
-    padding:16,
-    fontSize:20
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    padding: 16,
+    fontSize: 20,
   },
 
-  button:{
-    marginTop:25,
-    backgroundColor:"#3498DB",
-    padding:16,
-    borderRadius:10,
-    alignItems:"center"
+  button: {
+    marginTop: 25,
+    backgroundColor: "#3498DB",
+    padding: 16,
+    borderRadius: 10,
+    alignItems: "center",
   },
 
-  buttonText:{
-    color:"#fff",
-    fontWeight:"bold",
-    fontSize:18
-  }
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
 });
