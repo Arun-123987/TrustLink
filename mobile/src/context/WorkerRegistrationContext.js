@@ -14,7 +14,7 @@ export const WorkerRegistrationProvider = ({ children }) => {
     serviceRadius: "",
     languages: [],
     skills: [],
-    profilePhoto: "",
+    profilePhoto: null,
     location: null,
   });
 
@@ -37,7 +37,7 @@ export const WorkerRegistrationProvider = ({ children }) => {
       serviceRadius: "",
       languages: [],
       skills: [],
-      profilePhoto: "",
+      profilePhoto: null,
       location: null,
     });
   };

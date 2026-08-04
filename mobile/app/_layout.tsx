@@ -6,6 +6,7 @@ import { AuthProvider } from "@/src/context/AuthContext";
 import 'react-native-reanimated';
 import { useSegments } from "expo-router";
 import { useEffect } from "react";
+import { WorkerProvider } from "@/src/context/WorkerContext";
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -24,16 +25,13 @@ useEffect(() => {
   return (
     <AuthProvider>
       <WorkerRegistrationProvider>
+         <WorkerProvider>
   <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
     <Stack>
       <Stack.Screen
   name="(auth)"
   options={{ headerShown: false }}
 />
-      <Stack.Screen
-        name="(tabs)"
-        options={{ headerShown: false }}
-      />
       <Stack.Screen
   name="role-select"
   options={{ headerShown: false }}
@@ -49,9 +47,19 @@ useEffect(() => {
           title: "Modal",
         }}
       />
+      <Stack.Screen
+  name="(customer)"
+  options={{ headerShown: false }}
+/>
+
+<Stack.Screen
+  name="(worker)"
+  options={{ headerShown: false }}
+/>
     </Stack>
     <StatusBar style="auto" />
   </ThemeProvider>
+  </WorkerProvider>
   </WorkerRegistrationProvider>
 </AuthProvider>
   );

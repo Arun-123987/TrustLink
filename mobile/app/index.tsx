@@ -11,7 +11,7 @@ export default function Index() {
         const token = await getAccessToken();
 
         if (token) {
-          router.replace("/(tabs)");
+          router.replace("/(customer)/(tabs)/home");
         } else {
           router.replace("/(auth)/login");
         }

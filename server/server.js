@@ -16,6 +16,9 @@ console.log("Loading worker routes...");
 const workerRoutes = require("./routes/workerRoutes");
 app.use("/api/workers", workerRoutes);
 
+const jobRoutes = require("./routes/jobRoutes");
+app.use("/api/jobs", jobRoutes);
+
 connectDB();
 
 app.listen(PORT, "0.0.0.0", () => {

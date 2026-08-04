@@ -6,7 +6,7 @@ export default function RoleSelectScreen() {
   const handleCustomer = async () => {
     try {
       await selectRole("customer");
-      router.replace("/(tabs)");
+      router.replace("/(customer)/(tabs)/home");
     } catch (err) {
       Alert.alert("Error", "Unable to select customer role");
     }

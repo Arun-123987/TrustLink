@@ -2,6 +2,8 @@ const User = require("../models/User");
 
 const selectRole = async (req, res) => {
   try {
+    console.log("req.user =", req.user);
+console.log("req.body =", req.body);
     const { role } = req.body;
 
     if (!["customer", "worker"].includes(role)) {
@@ -32,11 +34,13 @@ const selectRole = async (req, res) => {
       role: user.role,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
+  console.error(err);
+
+  res.status(500).json({
+    success: false,
+    message: err.message,
+  });
+}
 };
 
 module.exports = {

@@ -1,5 +1,6 @@
 console.log("✅ workerController loaded");
 const Worker = require("../models/Worker");
+const JobRequest = require("../models/JobRequest");
 
 /**
  * POST /api/workers/register
@@ -61,6 +62,30 @@ const registerWorker = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to create worker profile",
+    });
+  }
+};
+
+const getNearbyWorkers = async (req, res) => {
+  try {
+    const workers = await Worker.find({
+      verificationStatus: "verified",
+      isAvailable: true,
+    })
+      .populate("user", "phone")
+      .sort({
+  reputationScore: -1,
+  createdAt: -1,
+});
+
+    return res.json({
+      success: true,
+      workers,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
@@ -130,8 +155,86 @@ const updateMyProfile = async (req, res) => {
   }
 };
 
+const getWorkerById = async (req, res) => {
+  try {
+    const worker = await Worker.findById(req.params.id)
+      .populate("user", "phone");
+
+    if (!worker) {
+      return res.status(404).json({
+        success: false,
+        message: "Worker not found",
+      });
+    }
+
+    return res.json({
+      success: true,
+      worker,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const getWorkerDashboard = async (req, res) => {
+  try {
+    const worker = await Worker.findOne({
+      user: req.user._id,
+    });
+
+    if (!worker) {
+      return res.status(404).json({
+        success: false,
+        message: "Worker not found",
+      });
+    }
+
+    const pending = await JobRequest.countDocuments({
+      worker: worker._id,
+      status: "pending",
+    });
+
+    const accepted = await JobRequest.countDocuments({
+      worker: worker._id,
+      status: "accepted",
+    });
+
+    const completed = await JobRequest.countDocuments({
+      worker: worker._id,
+      status: "completed",
+    });
+
+    return res.json({
+      success: true,
+      worker: {
+        fullName: worker.fullName,
+        verificationStatus: worker.verificationStatus,
+        isAvailable: worker.isAvailable,
+      },
+      stats: {
+        pending,
+        accepted,
+        completed,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   registerWorker,
   getMyProfile,
   updateMyProfile,
+  getWorkerDashboard,
+  getWorkerById,
+  getNearbyWorkers,
 };

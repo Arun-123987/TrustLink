@@ -3,6 +3,8 @@ const User = require("../models/User");
 
 const auth = async (req, res, next) => {
   try {
+    console.log("Authorization Header:", req.headers.authorization);
+
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -19,6 +21,8 @@ const auth = async (req, res, next) => {
       process.env.JWT_ACCESS_SECRET
     );
 
+    console.log("Decoded Token:", decoded);
+
     const user = await User.findById(decoded.id).select("-refreshToken");
 
     if (!user) {
@@ -32,6 +36,8 @@ const auth = async (req, res, next) => {
 
     next();
   } catch (error) {
+    console.error("Auth Middleware Error:", error.message);
+
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token",

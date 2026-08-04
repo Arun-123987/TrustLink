@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Alert,
+  TextInput,
 } from "react-native";
 import { router } from "expo-router";
 
@@ -18,6 +19,8 @@ export default function SkillsScreen() {
     useWorkerRegistration();
 
   const [selectedSkills, setSelectedSkills] = useState([]);
+  const [search, setSearch] = useState("");
+  
   const [loading, setLoading] = useState(false);
 
   const toggleSkill = (category, subcategory) => {
@@ -73,7 +76,7 @@ export default function SkillsScreen() {
 
       Alert.alert("Success", "Registration Completed");
 
-      router.replace("/(tabs)");
+      router.replace("/worker/profile");
     } catch (error) {
       Alert.alert(
         "Error",
@@ -91,8 +94,17 @@ export default function SkillsScreen() {
       contentContainerStyle={{ padding: 20 }}
     >
       <Text style={styles.title}>Select Your Skills</Text>
-
-      {SKILLS.map((item) => (
+      <TextInput
+  placeholder="Search skills..."
+  value={search}
+  onChangeText={setSearch}
+  style={styles.search}
+/>
+      {SKILLS.filter((item) =>
+  item.category
+    .toLowerCase()
+    .includes(search.toLowerCase())
+).map((item) => (
         <View key={item.category}>
           <Text style={styles.category}>
             {item.category}
@@ -107,15 +119,16 @@ export default function SkillsScreen() {
 
             return (
               <TouchableOpacity
-                key={sub}
-                style={[
-                  styles.skill,
-                  selected && styles.selected,
-                ]}
-                onPress={() =>
-                  toggleSkill(item.category, sub)
-                }
-              >
+  key={sub}
+  style={[
+    styles.skill,
+    selected && styles.selected,
+  ]}
+  activeOpacity={0.8}
+  onPress={() =>
+    toggleSkill(item.category, sub)
+  }
+>
                 <Text
                   style={[
                     styles.skillText,
@@ -137,6 +150,9 @@ export default function SkillsScreen() {
         onPress={submit}
         disabled={loading}
       >
+        <Text style={styles.count}>
+Selected Skills : {selectedSkills.length}
+</Text>
         <Text style={styles.buttonText}>
           {loading
             ? "Registering..."
@@ -196,4 +212,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+
+  search: {
+  borderWidth: 1,
+  borderColor: "#ddd",
+  borderRadius: 12,
+  paddingHorizontal: 15,
+  paddingVertical: 12,
+  marginBottom: 20,
+},
+
+count: {
+  marginTop: 25,
+  fontWeight: "600",
+  fontSize: 16,
+},
+
 });

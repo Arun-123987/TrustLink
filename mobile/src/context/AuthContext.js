@@ -5,7 +5,12 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [confirmation, setConfirmation] = useState(null);
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({
+  id: "",
+  phone: "",
+  role: "",
+  displayName: "",
+});
 
   const [accessToken, setAccessToken] = useState(null);
 

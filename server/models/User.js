@@ -10,9 +10,9 @@ const userSchema = new mongoose.Schema(
     },
 
     role: {
-    type: String,
-    enum: ["user", "worker", "admin", "pending"],
-    default: "pending",
+  type: String,
+  enum: ["pending", "customer", "worker", "admin"],
+  default: "pending",
 },
 
     displayName: {

@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import auth from "@react-native-firebase/auth";
 import { router } from "expo-router";
 
 import { useAuth } from "@/src/context/AuthContext";
@@ -65,16 +64,16 @@ export default function OTPScreen() {
           break;
 
         case "worker":
-          router.replace("/(tabs)");
-          break;
+  router.replace("/(worker)/(tabs)/dashboard");
+  break;
 
-        case "customer":
-          router.replace("/(tabs)");
-          break;
+case "customer":
+  router.replace("/(customer)/(tabs)/home");
+  break;
 
-        case "admin":
-          router.replace("/(tabs)");
-          break;
+case "admin":
+  Alert.alert("Admin module not implemented");
+  break;
 
         default:
           Alert.alert("Unknown user role");

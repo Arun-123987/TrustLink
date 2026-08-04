@@ -1,4 +1,10 @@
 import React from "react";
+import { Image } from "react-native";
+import { pickProfileImage } from "@/src/services/imagePicker";
+import { useWorkerRegistration } from "@/src/context/WorkerRegistrationContext";
+import { Switch } from "react-native";
+import { getCurrentLocation } from "@/src/services/locationService";
+
 import {
   View,
   Text,
@@ -9,11 +15,53 @@ import {
   Alert,
 } from "react-native";
 import { Controller, useForm } from "react-hook-form";
-import { useWorkerRegistration } from "@/src/context/WorkerRegistrationContext";
+
 import { router } from "expo-router";
 
 export default function RegisterWorkerScreen() {
-  const { updateWorkerData } = useWorkerRegistration();
+  const {
+  updateWorkerData,
+  workerData,
+} = useWorkerRegistration();
+
+  const [available, setAvailable] = React.useState(true);
+  const [loadingLocation, setLoadingLocation] = React.useState(false);
+
+  const fetchLocation = async () => {
+  try {
+    setLoadingLocation(true);
+
+    const location = await getCurrentLocation();
+
+    updateWorkerData({
+      isAvailable: available,
+      location: {
+        type: "Point",
+        coordinates: [
+          location.longitude,
+          location.latitude,
+        ],
+      },
+    });
+
+    Alert.alert("Success", "Location captured");
+  } catch (error) {
+    Alert.alert("Error", error.message);
+  } finally {
+    setLoadingLocation(false);
+  }
+};
+
+
+const selectImage = async () => {
+  const image = await pickProfileImage();
+
+  if (!image) return;
+
+  updateWorkerData({
+    profilePhoto: image,
+  });
+};
 
   const {
     control,
@@ -61,10 +109,49 @@ export default function RegisterWorkerScreen() {
       contentContainerStyle={{ padding: 20 }}
       showsVerticalScrollIndicator={false}
     >
+      <Text style={styles.label}>Current Location</Text>
+
+<TouchableOpacity
+  style={styles.locationButton}
+  onPress={fetchLocation}
+>
+  <Text style={styles.locationButtonText}>
+    {loadingLocation
+      ? "Fetching..."
+      : "Use Current Location"}
+  </Text>
+</TouchableOpacity>
+
+<View style={styles.switchRow}>
+  <Text style={styles.label}>
+    Available for Work
+  </Text>
+
+  <Switch
+    value={available}
+    onValueChange={setAvailable}
+  />
+</View>
       <Text style={styles.title}>Worker Registration</Text>
-
+      <TouchableOpacity
+  style={styles.imageContainer}
+  onPress={selectImage}
+>
+  {workerData.profilePhoto ? (
+    <Image
+      source={{
+        uri: workerData.profilePhoto.uri,
+      }}
+      style={styles.image}
+    />
+  ) : (
+    <Text style={styles.imageText}>
+      Select Profile Photo
+    </Text>
+  )}
+</TouchableOpacity>
       <Text style={styles.label}>Full Name</Text>
-
+      
       <Controller
         control={control}
         rules={{
@@ -248,4 +335,47 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+
+  imageContainer: {
+  height: 140,
+  width: 140,
+  alignSelf: "center",
+  borderRadius: 70,
+  backgroundColor: "#F2F2F2",
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 25,
+},
+
+image: {
+  width: 140,
+  height: 140,
+  borderRadius: 70,
+},
+
+imageText: {
+  color: "#555",
+  textAlign: "center",
+},
+
+locationButton: {
+  backgroundColor: "#27AE60",
+  padding: 14,
+  borderRadius: 10,
+  marginTop: 10,
+},
+
+locationButtonText: {
+  color: "#fff",
+  textAlign: "center",
+  fontWeight: "600",
+},
+
+switchRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginTop: 25,
+},
+
 });
