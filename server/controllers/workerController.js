@@ -230,10 +230,45 @@ const getWorkerDashboard = async (req, res) => {
   }
 };
 
+const updateAvailability = async (req, res) => {
+  try {
+    const { isAvailable } = req.body;
+
+    const worker = await Worker.findOne({
+      user: req.user._id,
+    });
+
+    if (!worker) {
+      return res.status(404).json({
+        success: false,
+        message: "Worker not found",
+      });
+    }
+
+    worker.isAvailable = isAvailable;
+
+    await worker.save();
+
+    return res.json({
+      success: true,
+      message: "Availability updated",
+      isAvailable: worker.isAvailable,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   registerWorker,
   getMyProfile,
   updateMyProfile,
+  updateAvailability,
   getWorkerDashboard,
   getWorkerById,
   getNearbyWorkers,

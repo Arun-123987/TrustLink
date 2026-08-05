@@ -6,9 +6,13 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Switch,
 } from "react-native";
 import { router } from "expo-router";
-import { getWorkerDashboard } from "@/src/services/dashboardApi";
+import {
+  getWorkerDashboard,
+  updateAvailability,
+} from "@/src/services/dashboardApi";
 import { useAuth } from "@/src/context/AuthContext";
 
 export default function Dashboard() {
@@ -31,6 +35,22 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
+
+  const toggleAvailability = async (value) => {
+  try {
+    await updateAvailability(value);
+
+    setDashboard((prev) => ({
+      ...prev,
+      worker: {
+        ...prev.worker,
+        isAvailable: value,
+      },
+    }));
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   if (loading) {
     return (
@@ -104,23 +124,23 @@ export default function Dashboard() {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Availability</Text>
+  <View
+    style={{
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    }}
+  >
+    <Text style={{ fontSize: 16 }}>
+      Availability
+    </Text>
 
-        <Text
-          style={{
-            color: dashboard.worker.isAvailable
-              ? "#28a745"
-              : "#dc3545",
-            fontWeight: "bold",
-            marginTop: 8,
-          }}
-        >
-          {dashboard.worker.isAvailable
-            ? "🟢 Available"
-            : "🔴 Offline"}
-        </Text>
-      </View>
-
+    <Switch
+      value={dashboard.worker.isAvailable}
+      onValueChange={toggleAvailability}
+    />
+  </View>
+</View>
       <TouchableOpacity
         style={styles.card}
         onPress={() => router.push("/(worker)/(tabs)/jobs")}

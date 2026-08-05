@@ -13,6 +13,7 @@ const {
   getNearbyWorkers,
   getWorkerById,
   getWorkerDashboard,
+  updateAvailability,
 } = require("../controllers/workerController");
 
 // Register Worker
@@ -36,6 +37,7 @@ router.get(
 );
 
 router.get("/dashboard", auth, getWorkerDashboard);
+router.put("/availability", auth, updateAvailability);
 router.get("/:id", auth, getWorkerById);
 
 module.exports = router;

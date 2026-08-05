@@ -7,3 +7,9 @@ export const backendLogin = async (idToken) => {
 
   return response.data;
 };
+
+// ADD THIS
+export const getCurrentUser = async () => {
+  const response = await api.get("/auth/me");
+  return response.data;
+};

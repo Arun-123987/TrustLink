@@ -2,27 +2,36 @@ import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { router } from "expo-router";
 
-import { getAccessToken } from "@/src/utils/secureStorage";
+import { useAuth } from "@/src/context/AuthContext";
 
 export default function Index() {
+  const { user, accessToken, loading } = useAuth();
+
   useEffect(() => {
-    const checkLogin = async () => {
-      try {
-        const token = await getAccessToken();
+    if (loading) return;
 
-        if (token) {
-          router.replace("/(customer)/(tabs)/home");
-        } else {
-          router.replace("/(auth)/login");
-        }
-      } catch (error) {
-        console.log("Auth Gate Error:", error);
-        router.replace("/(auth)/login");
-      }
-    };
+    if (!accessToken) {
+      router.replace("/(auth)/login");
+      return;
+    }
 
-    checkLogin();
-  }, []);
+    switch (user.role) {
+      case "worker":
+        router.replace("/(worker)/(tabs)/dashboard");
+        break;
+
+      case "customer":
+        router.replace("/(customer)/(tabs)/home");
+        break;
+
+      case "admin":
+  router.replace("/(customer)/(tabs)/home");
+  break;
+
+      default:
+        router.replace("/role-select");
+    }
+  }, [loading, accessToken, user.role]);
 
   return (
     <View
