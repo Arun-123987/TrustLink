@@ -3,3 +3,19 @@ node_modules
 google-services.json
 config/firebase-service-account.json
 .idea/
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/.kotlin/
+
+# Logs
+*.log
+
+# Windows
+Thumbs.db
+
+# Expo
+.expo/

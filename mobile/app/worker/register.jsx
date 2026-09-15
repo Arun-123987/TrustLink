@@ -33,19 +33,24 @@ export default function RegisterWorkerScreen() {
 
     const location = await getCurrentLocation();
 
+    const workerLocation = {
+      type: "Point",
+      coordinates: [
+        location.longitude,
+        location.latitude,
+      ],
+    };
+
+    console.log("📍 Worker Location:", workerLocation);
+
     updateWorkerData({
       isAvailable: available,
-      location: {
-        type: "Point",
-        coordinates: [
-          location.longitude,
-          location.latitude,
-        ],
-      },
+      location: workerLocation,
     });
 
     Alert.alert("Success", "Location captured");
   } catch (error) {
+    console.log("❌ Location Error:", error);
     Alert.alert("Error", error.message);
   } finally {
     setLoadingLocation(false);
@@ -59,7 +64,7 @@ const selectImage = async () => {
   if (!image) return;
 
   updateWorkerData({
-    profilePhoto: image,
+    profilePhoto: image.uri,
   });
 };
 
@@ -111,6 +116,13 @@ const selectImage = async () => {
     >
       <Text style={styles.label}>Current Location</Text>
 
+      <TouchableOpacity
+  onPress={() => router.back()}
+  style={styles.backButton}
+>
+  <Text style={styles.backButtonText}>← Back</Text>
+</TouchableOpacity>
+
 <TouchableOpacity
   style={styles.locationButton}
   onPress={fetchLocation}
@@ -138,17 +150,15 @@ const selectImage = async () => {
   onPress={selectImage}
 >
   {workerData.profilePhoto ? (
-    <Image
-      source={{
-        uri: workerData.profilePhoto.uri,
-      }}
-      style={styles.image}
-    />
-  ) : (
-    <Text style={styles.imageText}>
-      Select Profile Photo
-    </Text>
-  )}
+  <Image
+    source={{ uri: workerData.profilePhoto }}
+    style={styles.image}
+  />
+) : (
+  <Text style={styles.imageText}>
+    Select Profile Photo
+  </Text>
+)}
 </TouchableOpacity>
       <Text style={styles.label}>Full Name</Text>
       

@@ -91,9 +91,13 @@ const workerSchema = new mongoose.Schema(
       },
 
       coordinates: {
-        type: [Number],
-        default: [0, 0],
-      },
+    type: [Number],
+    required: true,
+    validate: {
+        validator: (v) => v.length === 2,
+        message: "Location must contain [longitude, latitude]",
+    },
+}
     },
 
     reputationScore: {
@@ -103,7 +107,12 @@ const workerSchema = new mongoose.Schema(
 
     verificationStatus: {
       type: String,
-      enum: ["pending", "verified", "rejected"],
+      enum:[
+"pending",
+"verified",
+"rejected",
+"flagged"
+],
       default: "pending",
     },
 

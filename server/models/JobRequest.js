@@ -26,6 +26,18 @@ const jobRequestSchema = new mongoose.Schema(
       trim: true,
     },
 
+    serviceCategory: {
+  type: String,
+  trim: true,
+  default: "",
+},
+
+serviceType: {
+  type: String,
+  trim: true,
+  default: "",
+},
+
     address: {
       type: String,
       required: true,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,15 @@ import {
   ScrollView,
   ActivityIndicator,
   Switch,
+  RefreshControl,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+
 import {
   getWorkerDashboard,
   updateAvailability,
 } from "@/src/services/dashboardApi";
+
 import { useAuth } from "@/src/context/AuthContext";
 
 export default function Dashboard() {
@@ -20,61 +23,122 @@ export default function Dashboard() {
 
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
-
-  const loadDashboard = async () => {
+  const loadDashboard = useCallback(async (isRefresh = false) => {
     try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
       const data = await getWorkerDashboard();
+
       setDashboard(data);
     } catch (error) {
-      console.log(error);
+      console.log(
+        "Dashboard error:",
+        error?.response?.data || error
+      );
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  }, []);
+
+  // Automatically refresh whenever Dashboard becomes active
+  useFocusEffect(
+    useCallback(() => {
+      loadDashboard(false);
+    }, [loadDashboard])
+  );
+
+  const handleRefresh = async () => {
+    await loadDashboard(true);
   };
 
   const toggleAvailability = async (value) => {
-  try {
-    await updateAvailability(value);
+    try {
+      await updateAvailability(value);
 
-    setDashboard((prev) => ({
-      ...prev,
-      worker: {
-        ...prev.worker,
-        isAvailable: value,
-      },
-    }));
-  } catch (error) {
-    console.log(error);
-  }
-};
+      setDashboard((prev) => {
+        if (!prev) return prev;
 
-  if (loading) {
+        return {
+          ...prev,
+          worker: {
+            ...prev.worker,
+            isAvailable: value,
+          },
+        };
+      });
+    } catch (error) {
+      console.log(
+        "Availability error:",
+        error?.response?.data || error
+      );
+    }
+  };
+
+  if (loading && !dashboard) {
     return (
       <View style={styles.loader}>
         <ActivityIndicator size="large" />
+
+        <Text style={styles.loadingText}>
+          Loading dashboard...
+        </Text>
+      </View>
+    );
+  }
+
+  if (!dashboard?.worker) {
+    return (
+      <View style={styles.loader}>
+        <Text style={styles.errorTitle}>
+          Unable to load dashboard
+        </Text>
+
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => loadDashboard(false)}
+        >
+          <Text style={styles.retryText}>
+            Try Again
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   const workerName =
-    dashboard?.worker?.fullName ||
+    dashboard.worker.fullName ||
     user?.displayName ||
     user?.phone ||
     "Worker";
 
+  const verificationStatus =
+    dashboard.worker.verificationStatus || "pending";
+
   const verificationColor =
-    dashboard.worker.verificationStatus === "verified"
+    verificationStatus === "verified"
       ? "#28a745"
-      : dashboard.worker.verificationStatus === "rejected"
+      : verificationStatus === "rejected"
       ? "#dc3545"
       : "#f39c12";
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+        />
+      }
+    >
       <Text style={styles.title}>
         Welcome, {workerName} 👋
       </Text>
@@ -86,28 +150,33 @@ export default function Dashboard() {
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {dashboard.stats.pending}
+            {dashboard.stats?.pending ?? 0}
           </Text>
+
           <Text>Pending</Text>
         </View>
 
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {dashboard.stats.accepted}
+            {dashboard.stats?.accepted ?? 0}
           </Text>
+
           <Text>Accepted</Text>
         </View>
 
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {dashboard.stats.completed}
+            {dashboard.stats?.completed ?? 0}
           </Text>
+
           <Text>Completed</Text>
         </View>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Verification</Text>
+        <Text style={styles.label}>
+          Verification
+        </Text>
 
         <View
           style={[
@@ -118,34 +187,43 @@ export default function Dashboard() {
           ]}
         >
           <Text style={styles.badgeText}>
-            {dashboard.worker.verificationStatus.toUpperCase()}
+            {verificationStatus.toUpperCase()}
           </Text>
         </View>
       </View>
 
       <View style={styles.card}>
-  <View
-    style={{
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    }}
-  >
-    <Text style={{ fontSize: 16 }}>
-      Availability
-    </Text>
+        <View style={styles.availabilityRow}>
+          <View>
+            <Text style={styles.availabilityTitle}>
+              Availability
+            </Text>
 
-    <Switch
-      value={dashboard.worker.isAvailable}
-      onValueChange={toggleAvailability}
-    />
-  </View>
-</View>
+            <Text style={styles.availabilitySubtitle}>
+              {dashboard.worker.isAvailable
+                ? "Customers can find and hire you"
+                : "You are currently unavailable"}
+            </Text>
+          </View>
+
+          <Switch
+            value={Boolean(
+              dashboard.worker.isAvailable
+            )}
+            onValueChange={toggleAvailability}
+          />
+        </View>
+      </View>
+
       <TouchableOpacity
         style={styles.card}
-        onPress={() => router.push("/(worker)/(tabs)/jobs")}
+        onPress={() =>
+          router.push("/(worker)/(tabs)/jobs")
+        }
       >
-        <Text style={styles.cardTitle}>📋 My Jobs</Text>
+        <Text style={styles.cardTitle}>
+          📋 My Jobs
+        </Text>
 
         <Text style={styles.cardDesc}>
           View pending, accepted and completed jobs
@@ -156,7 +234,9 @@ export default function Dashboard() {
         style={styles.card}
         onPress={() => router.push("/worker/edit")}
       >
-        <Text style={styles.cardTitle}>👤 Edit Profile</Text>
+        <Text style={styles.cardTitle}>
+          👤 Edit Profile
+        </Text>
 
         <Text style={styles.cardDesc}>
           Update your profile information
@@ -165,9 +245,13 @@ export default function Dashboard() {
 
       <TouchableOpacity
         style={styles.card}
-        onPress={() => router.push("/(worker)/(tabs)/profile")}
+        onPress={() =>
+          router.push("/(worker)/(tabs)/profile")
+        }
       >
-        <Text style={styles.cardTitle}>⚙️ Profile</Text>
+        <Text style={styles.cardTitle}>
+          ⚙️ Profile
+        </Text>
 
         <Text style={styles.cardDesc}>
           Settings, availability and logout
@@ -188,6 +272,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
+  },
+
+  loadingText: {
+    color: "#666",
+    marginTop: 10,
+  },
+
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 15,
+  },
+
+  retryButton: {
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 25,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+
+  retryText: {
+    color: "#fff",
+    fontWeight: "700",
   },
 
   title: {
@@ -247,6 +355,23 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 12,
+  },
+
+  availabilityRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  availabilityTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  availabilitySubtitle: {
+    color: "#777",
+    marginTop: 4,
+    maxWidth: 240,
   },
 
   cardTitle: {

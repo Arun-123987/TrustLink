@@ -1,14 +1,18 @@
 import * as Location from "expo-location";
 
-export const getCurrentLocation = async () => {
-  // Request permission
+export const requestLocationPermission = async () => {
   const { status } = await Location.requestForegroundPermissionsAsync();
 
   if (status !== "granted") {
     throw new Error("Location permission denied");
   }
 
-  // Get current position
+  return true;
+};
+
+export const getCurrentLocation = async () => {
+  await requestLocationPermission();
+
   const location = await Location.getCurrentPositionAsync({
     accuracy: Location.Accuracy.High,
   });

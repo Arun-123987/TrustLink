@@ -1,7 +1,20 @@
 import api from "./api";
 
-export const getNearbyWorkers = async () => {
-  const response = await api.get("/workers/nearby");
+export const getNearbyWorkers = async ({
+  latitude,
+  longitude,
+  radius = 10,
+  skill = "",
+}) => {
+  const response = await api.get("/workers/nearby", {
+    params: {
+      lat: latitude,
+      lng: longitude,
+      radius,
+      skill,
+    },
+  });
+
   return response.data;
 };
 
